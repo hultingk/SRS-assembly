@@ -59,3 +59,4 @@ rsconnect/
 *.log
 *.xlsx
 .positai
+*.svg
