@@ -116,7 +116,6 @@ confint(m.direction)
 ###############################
 ###### ANIMAL #####
 ###############################
-
 animal_data$time <- as.numeric(animal_data$time)
 # first 12 years
 animal_1_12 <- animal_data %>%
@@ -586,7 +585,9 @@ direction_predict_plot_1 <- predict_direction_1 %>%
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   geom_point(aes(x = x, y = predicted, fill = group), size = 7.5, 
              data = predict_direction_1,  position = position_dodge(width = 0.7),
              colour="black", pch=21, stroke = 2)+ 
@@ -618,7 +619,9 @@ direction_predict_plot_2 <- predict_direction_2 %>%
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   geom_point(aes(x = x, y = predicted, fill = group), size = 7.5, 
              data = predict_direction_2,  position = position_dodge(width = 0.7),
              colour="black", pch=21, stroke = 2)+ 
@@ -664,14 +667,106 @@ figure3 <- cowplot::plot_grid(direction_predict_plot_1, direction_predict_plot_2
 figure3
 
 # # exporting
-# pdf(file = file.path("plots", "figure3.pdf"), width = 12.5, height = 13)
-# figure3
-# dev.off()
+pdf(file = file.path("plots", "figure3.pdf"), width = 12.5, height = 13)
+figure3
+dev.off()
 
 
 
 
+# individual plot 
+direction_plot <- m.direction.predict %>%
+  ggplot() +
+  # geom_jitter(aes(x = time, y = directionality, color = patch_type),
+  #            data = dispersal_mode_direction_1, alpha = 0.2, size = 5.5,
+  #            position = position_jitterdodge(jitter.width = 0.2, jitter.height = 0, dodge.width = 0.7)) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = group), color = "black",
+                data = m.direction.predict, width = 0, linewidth = 3,  position = position_dodge(width = 0.7)) +
+  scale_y_continuous(limits = c(0.32, 0.38), labels = label_number(accuracy = 0.01)) +
+  theme_minimal(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.5),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  geom_point(aes(x = x, y = predicted, fill = group), size = 7.5, 
+             data = m.direction.predict,  position = position_dodge(width = 0.7),
+             colour="black", pch=21, stroke = 2)+ 
+  labs(title = NULL,
+       x = NULL,
+       y = "Trajectory directionality") +
+  scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
+                    labels = c("Connected", "Rectangular", "Winged"), 
+                    name = "Patch Type") +
+  scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
+                     labels = c("Connected", "Rectangular", "Winged"), 
+                     name = "Patch Type") +
+  theme(axis.text = element_text(size = 18)) +
+  theme(legend.position = "none") 
+direction_plot
+
+pdf(file = file.path("plots", "direction_plot.pdf"), width = 8, height = 6)
+direction_plot
+dev.off()
 
 
 
 
+# dispersal mode plot 
+# # FACET BY ROWS - total and animal together and gravity and wind together
+predict_direction_mode <- rbind(
+  m.direction.animal.predict, m.direction.wind.predict, m.direction.gravity.predict
+)
+
+# making sure factors are in the right order
+predict_direction_mode$dispersal_mode <- factor(predict_direction_mode$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
+
+# joining together data points
+dispersal_mode_direction_points <- rbind(
+  animal_direction_all, wind_direction_all, gravity_direction_all
+)
+
+
+# making sure factors are in the right order
+dispersal_mode_direction_points$dispersal_mode <- factor(dispersal_mode_direction_points$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
+
+# two faceted plots
+# first set of plots
+direction_predict_plot_mode <- predict_direction_mode %>%
+  ggplot() +
+  geom_jitter(aes(x = time, y = directionality, color = patch_type),
+             data = dispersal_mode_direction_points, alpha = 0.2, size = 5.5,
+             position = position_jitterdodge(jitter.width = 0.08, jitter.height = 0, dodge.width = 0.7)) +
+  geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = group), color = "black",
+                data = predict_direction_mode, width = 0, linewidth = 3,  position = position_dodge(width = 0.7)) +
+  facet_wrap(~dispersal_mode, scales = "free", labeller = as_labeller(c("Animal" = "(A) Animal-dispersed", "Wind" = "(B) Wind-dispersed", "Gravity" = "(C) Gravity-dispersed"))) +
+  scale_y_continuous(limits = c(0.3, 0.4), labels = label_number(accuracy = 0.01)) +
+  theme_minimal(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.5),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  geom_point(aes(x = x, y = predicted, fill = group), size = 7.5, 
+             data = predict_direction_mode,  position = position_dodge(width = 0.7),
+             colour="black", pch=21, stroke = 2)+ 
+  labs(title = NULL,
+       x = NULL,
+       y = "Trajectory directionality") +
+  scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
+                    labels = c("Connected", "Rectangular", "Winged"), 
+                    name = "Patch Type") +
+  scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
+                     labels = c("Connected", "Rectangular", "Winged"), 
+                     name = "Patch Type") +
+  theme(axis.text = element_text(size = 18)) +
+  theme(legend.position = "none") 
+direction_predict_plot_mode
+
+pdf(file = file.path("plots", "direction_predict_plot_mode.pdf"), width = 14, height = 5.5)
+direction_predict_plot_mode
+dev.off()

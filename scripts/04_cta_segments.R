@@ -584,6 +584,7 @@ m.animal_segments.predict <- m.animal_segments.predict %>%
 m.gravity_segments.predict <- ggpredict(m_length_gravity_quad, terms=c("s.time [all]", "patch_type [all]"), back_transform = T)
 m.gravity_segments.predict <- as.data.frame(m.gravity_segments.predict)
 m.gravity_segments.predict$dispersal_mode <- "Gravity"
+m.gravity_segments.predict$linetype <- "solid" # adding line type
 gravity_time_key <- gravity_segment_lengths %>%
   count(time, s.time) %>%
   dplyr::select(-n) %>%
@@ -595,6 +596,7 @@ m.gravity_segments.predict <- m.gravity_segments.predict %>%
 m.wind_segments.predict <- ggpredict(m_length_wind_quad, terms=c("s.time [all]", "patch_type [all]"), back_transform = T)
 m.wind_segments.predict <- as.data.frame(m.wind_segments.predict)
 m.wind_segments.predict$dispersal_mode <- "Wind"
+m.wind_segments.predict$linetype <- "solid" # adding line type
 wind_time_key <- wind_segment_lengths %>%
   count(time, s.time) %>%
   dplyr::select(-n) %>%
@@ -648,7 +650,9 @@ segments_plot_1 <- predict_segments_1 %>%
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
   scale_linetype_manual(values = c('solid','longdash'), guide = "none") +
@@ -673,7 +677,9 @@ segments_plot_2 <- predict_segments_2 %>%
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
   xlab("Years since site creation") +
@@ -732,7 +738,7 @@ all_segment_plot <- m_length_predict %>%
   ylab(expression(atop("Trajectory distance", paste("between consecutive surveys")))) +
   #guides(fill=guide_legend(ncol=1)) +
   #guides(color=guide_legend(ncol=1)) +
-  scale_y_continuous(limits = c(0.15, 0.45), labels = label_number(accuracy = 0.01)) +
+  #scale_y_continuous(limits = c(0.19, 0.38), labels = label_number(accuracy = 0.01)) +
   theme(axis.text = element_text(size = 20), 
         legend.text = element_text(size = 26),
         legend.title = element_text(size = 26),
@@ -751,10 +757,10 @@ dev.off()
 all_segment_plot <- segment_lengths %>%
   ggplot(aes(time, distance, color = patch_type, fill = patch_type)) +
   geom_point(aes(time, distance, color = patch_type), size = 6, alpha = 0.15, data = segment_lengths) +
-  geom_smooth(method = "lm", formula = y ~ x + I(x^2), alpha = 0.2, linewidth = 3.5) +
+  geom_smooth(method = "lm", formula = y ~ x + I(x^2), alpha = 0.2, linewidth = 4) +
   #geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
  # geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 32) +
+  theme_minimal(base_size = 36) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -774,4 +780,66 @@ all_segment_plot <- segment_lengths %>%
         plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(legend.position = "top")
 all_segment_plot
+
+pdf(file = file.path("plots", "all_segment_plot.pdf"), width = 12, height = 12)
+all_segment_plot
+dev.off()
+
+
+
+# dispersal mode plots
+# FACET BY ROWS - total and animal together and gravity and wind together
+# joining together predictions
+predict_segments_mode <- rbind(
+  m.animal_segments.predict, m.wind_segments.predict, m.gravity_segments.predict
+)
+
+
+predict_segments_mode$dispersal_mode <- factor(predict_segments_mode$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
+predict_segments_mode$linetype <- factor(predict_segments_mode$linetype, levels = c("solid", "dashed"))
+
+predict_segments_mode$time <- as.numeric(as.character(predict_segments_mode$time))
+
+# joining together data points
+# segment_lengths <- segment_lengths %>%
+#   dplyr::select(-soil_moisture, -year_since_fire)
+# putting data together for plotting
+dispersal_mode_segments_points <- rbind(
+  animal_segment_lengths, wind_segment_lengths, gravity_segment_lengths
+)
+dispersal_mode_segments_points$dispersal_mode <- factor(dispersal_mode_segments_points$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
+dispersal_mode_segments_points$time <- as.numeric(as.character(dispersal_mode_segments_points$time))
+
+# two faceted plots
+# first set of plots
+segments_plot_mode <- predict_segments_mode %>%
+  ggplot() +
+  geom_point(aes(time, distance, color = patch_type), size = 3, alpha = 0.1, data = dispersal_mode_segments_points) +
+  geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
+  geom_line(aes(time, predicted, color = group, linetype = linetype), linewidth = 2.5) +
+  facet_wrap(~dispersal_mode, scales = "free", labeller = as_labeller(c("Animal" = "(A) Animal-dispersed", "Wind" = "(B) Wind-dispersed", "Gravity" = "(C) Gravity-dispersed"))) +
+  theme_minimal(base_size = 26) +
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
+  scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
+  scale_linetype_manual(values = c('solid','longdash'), guide = "none") +
+  xlab(NULL) +
+  ylab(expression(atop("Trajectory distance", paste("between consecutive surveys")))) +
+  guides(fill=guide_legend(ncol=1)) +
+  guides(color=guide_legend(ncol=1)) +
+ # scale_y_continuous(limits = c(0.16, 0.35), breaks = c(0.20, 0.30), labels = label_number(accuracy = 0.01)) +
+  theme(axis.text = element_text(size = 18)) +
+  theme(legend.position = "none") 
+segments_plot_mode
+
+
+pdf(file = file.path("plots", "segments_plot_mode_plot.pdf"), width = 14, height = 6)
+segments_plot_mode
+dev.off()
 

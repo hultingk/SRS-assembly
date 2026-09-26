@@ -527,7 +527,9 @@ converge_plot_1 <- predict_converge_1 %>%
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Comparison") +
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Comparison") +
   xlab(NULL) +
@@ -552,7 +554,9 @@ converge_plot_2 <- predict_converge_2 %>%
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Comparison") +
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Comparison") +
   xlab("Years since site creation") +
@@ -595,7 +599,7 @@ figure4
 # pdf(file = file.path("plots", "figure4.pdf"), width = 12.5, height = 12.5)
 # figure4
 # dev.off()
-# # 
+# #
 # # #exporting legend seperately
 # pdf(file = file.path("plots", "figure4_legend.pdf"), width = 11.5, height = 1.5)
 # plot(l)
@@ -621,13 +625,15 @@ convergence_plot <- m.converge.predict %>%
   ggplot() +
   geom_point(aes(time, jaccard, color = patch_pair), size = 4, alpha = 0.07, data = convergence_jaccard) +
   geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
-  geom_line(aes(time, predicted, color = group), linewidth = 2.5) +
+  geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
   theme_minimal(base_size = 28) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
                                                                             expression("Connected"%<->%"Winged"),
                                                                             expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
@@ -637,8 +643,8 @@ convergence_plot <- m.converge.predict %>%
   xlab("Years since site creation") +
   ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
   guides(fill=guide_legend(ncol=1)) +
-  #ylim(0.30, 0.50) +
- # scale_y_continuous(limits = c(0.32, 0.55), labels = label_number(accuracy = 0.01)) +
+  #ylim(0.23, 0.55) +
+  scale_y_continuous(limits = c(0.23, 0.55), labels = label_number(accuracy = 0.01)) +
   guides(color=guide_legend(ncol=1)) +
   theme(axis.text = element_text(size = 16),
         legend.text = element_text(size = 26),
@@ -648,45 +654,69 @@ convergence_plot <- m.converge.predict %>%
   theme(legend.position = "right") 
 convergence_plot
 
-pdf(file = file.path("plots", "convergence_plot.pdf"), width = 14, height = 8)
-convergence_plot
-dev.off()
+# pdf(file = file.path("plots", "convergence_plot.pdf"), width = 14, height = 8)
+# convergence_plot
+# dev.off()
 
 
 
+### three dispersal mode plot
+predict_converge_mode <- rbind(
+  m.converge_animal.predict, m.converge_wind.predict, m.converge_gravity.predict
+)
 
 
+# creating key of scaled times to join to predictions for easy visualization
+scaled_time_key <- convergence_jaccard %>%
+  count(time, s.time) %>%
+  dplyr::select(-n) %>%
+  mutate(s.time = round(s.time, 2))
 
+# joining with time
+predict_converge_mode <- predict_converge_mode %>%
+  left_join(scaled_time_key, by = c("x" = "s.time"))
 
-# plotting
-convergence_plot <- convergence_jaccard %>%
-  ggplot(aes(time, jaccard, color = patch_pair, fill = patch_pair)) +
-  #geom_point(aes(time, jaccard, color = patch_pair), size = 4, alpha = 0.07, data = convergence_jaccard) +
-  geom_smooth(method = "lm", formula = y ~ x + I(x^2), alpha = 0.5, linewidth = 2) +
-  #geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
-  #geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 32) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+predict_converge_mode$dispersal_mode <- factor(predict_converge_mode$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
+
+# joining together data points
+dispersal_mode_convergence_points <- rbind(
+  animal_convergence_jaccard, wind_convergence_jaccard, gravity_convergence_jaccard
+)
+dispersal_mode_convergence_points$dispersal_mode <- factor(dispersal_mode_convergence_points$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
+
+# first set of plots
+converge_plot_mode <- predict_converge_mode %>%
+  ggplot() +
+  geom_point(aes(time, jaccard, color = patch_pair), size = 3, alpha = 0.05, data = dispersal_mode_convergence_points) +
+  geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.30) +
+  geom_line(aes(time, predicted, color = group), linewidth = 3) +
+  facet_wrap(~dispersal_mode, scales = "free", labeller = as_labeller(c("Animal" = "(A) Animal-dispersed", "Wind" = "(B) Wind-dispersed", "Gravity" = "(C) Gravity-dispersed"))) +
+  theme_minimal(base_size = 26) +
+  theme(panel.border = element_rect(color = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
         axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
                                                                             expression("Connected"%<->%"Winged"),
                                                                             expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
                                                                              expression("Connected"%<->%"Winged"),
                                                                              expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
-  xlab("Years since site creation") +
+  xlab(NULL) +
   ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
   guides(fill=guide_legend(ncol=1)) +
-  #ylim(0.22, 0.55) +
-  # scale_y_continuous(limits = c(0.32, 0.55), labels = label_number(accuracy = 0.01)) +
   guides(color=guide_legend(ncol=1)) +
-  theme(axis.text = element_text(size = 16),
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  theme(legend.position = "right") 
-convergence_plot
+  #ylim(0.25, 0.55) +
+  #scale_y_continuous(limits = c(0.25, 0.47), labels = label_number(accuracy = 0.01)) +
+  theme(axis.text = element_text(size = 16)) +
+  theme(legend.position = "bottom") 
+converge_plot_mode
+
+
+pdf(file = file.path("plots", "dispersal_mode_convergence_plot.pdf"), width = 14, height = 6)
+converge_plot_mode
+dev.off()
+

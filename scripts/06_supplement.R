@@ -245,15 +245,17 @@ changed_plot <- predict_changed %>%
   ggplot(aes(x = time, y = predicted, color = group)) +
   geom_point(aes(time, change, color = patch_type), data = changed_total, size = 4, alpha = 0.1) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2, color = NA) +
-  geom_line(size = 2) +
+  geom_line(size = 3) +
   xlab("Years since site creation") +
   ylab(expression(atop("Number of gains and losses", paste("between consecutive surveys")))) +
   theme_minimal(base_size = 22) +
-  theme(panel.border = element_rect(colour = "darkgrey", fill=NA, linewidth=1),
-        panel.grid.major = element_blank(), 
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "darkgrey", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(axis.text = element_text(size = 16)) +
   ylim(0, 150) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
@@ -276,15 +278,17 @@ present_plot <- predict_present %>%
   ggplot(aes(x = time, y = predicted, color = group)) +
   geom_point(aes(time, change, color = patch_type), data = stayed_present, size = 4, alpha = 0.1) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2, color = NA) +
-  geom_line(size = 2) +
+  geom_line(size = 3) +
   xlab("Years since site creation") +
   ylab(expression(atop("Number of species consistent", paste("between consecutive surveys")))) +
   theme_minimal(base_size = 22) +
-  theme(panel.border = element_rect(colour = "darkgrey", fill=NA, linewidth=1),
-        panel.grid.major = element_blank(), 
+  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
+        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "darkgrey", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05)) +
+        axis.ticks = element_line(color = "black", linewidth = 0.7),
+        strip.text.x = element_text(hjust = -0.05),
+        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
+        plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(axis.text = element_text(size = 16)) +
   ylim(0, 150) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
@@ -298,9 +302,9 @@ figureS2
 
 
 # exporting
-# pdf(file = file.path("plots", "figureS2.pdf"), width = 14, height = 5.5)
-# figureS2
-# dev.off()
+pdf(file = file.path("plots", "figureS2.pdf"), width = 14, height = 5.5)
+figureS2
+dev.off()
 
 
 # individual present plot
