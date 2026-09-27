@@ -115,7 +115,7 @@ all_segment_plot_subset <- m_length_predict_subset %>%
         legend.title = element_text(size = 26),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA)) +
-  theme(legend.position = "top")
+  theme(legend.position = "right")
 all_segment_plot_subset
 
 
@@ -213,9 +213,9 @@ m.direction.predict_subset$dispersal_mode <- "All Species"
 # plotting
 direction_plot_subset <- m.direction.predict_subset %>%
   ggplot() +
-  # geom_jitter(aes(x = time, y = directionality, color = patch_type),
-  #            data = dispersal_mode_direction_1, alpha = 0.2, size = 5.5,
-  #            position = position_jitterdodge(jitter.width = 0.2, jitter.height = 0, dodge.width = 0.7)) +
+  geom_jitter(aes(x = time, y = directionality, color = patch_type),
+             data = segment_direction_all_subset, alpha = 0.2, size = 5.5,
+             position = position_jitterdodge(jitter.width = 0.2, jitter.height = 0, dodge.width = 0.7)) +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = group), color = "black",
                 data = m.direction.predict_subset, width = 0, linewidth = 3,  position = position_dodge(width = 0.7)) +
   #scale_y_continuous(limits = c(0.32, 0.38), labels = label_number(accuracy = 0.01)) +
@@ -231,7 +231,7 @@ direction_plot_subset <- m.direction.predict_subset %>%
              data = m.direction.predict_subset,  position = position_dodge(width = 0.7),
              colour="black", pch=21, stroke = 2)+ 
   labs(title = NULL,
-       x = NULL,
+       x = "Time Period",
        y = "Trajectory directionality") +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
                     labels = c("Connected", "Rectangular", "Winged"), 
@@ -240,7 +240,7 @@ direction_plot_subset <- m.direction.predict_subset %>%
                      labels = c("Connected", "Rectangular", "Winged"), 
                      name = "Patch Type") +
   theme(axis.text = element_text(size = 18)) +
-  theme(legend.position = "none") 
+  theme(legend.position = "right") 
 direction_plot_subset
 
 
@@ -292,10 +292,10 @@ scaled_time_key_subset <- convergence_jaccard_subset %>%
 convergence_plot_subset <- m.converge.predict_subset %>%
   left_join(scaled_time_key_subset, by = c("x" = "s.time")) %>%
   ggplot() +
-  geom_point(aes(time, jaccard, color = patch_pair), size = 4, alpha = 0.07, data = convergence_jaccard_subset) +
+  geom_point(aes(time, jaccard, color = patch_pair), size = 6, alpha = 0.07, data = convergence_jaccard_subset) +
   geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 28) +
+  theme_minimal(base_size = 32) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -313,7 +313,7 @@ convergence_plot_subset <- m.converge.predict_subset %>%
   ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
   guides(fill=guide_legend(ncol=1)) +
   guides(color=guide_legend(ncol=1)) +
-  theme(axis.text = element_text(size = 16),
+  theme(axis.text = element_text(size = 20),
         legend.text = element_text(size = 26),
         legend.title = element_text(size = 26),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
@@ -321,5 +321,19 @@ convergence_plot_subset <- m.converge.predict_subset %>%
   theme(legend.position = "right") 
 convergence_plot_subset
 
+
+
+#### plots exporting ####
+pdf(file = file.path("plots", "calendar_subset_length.pdf"), width = 14, height = 8)
+all_segment_plot_subset
+dev.off()
+
+pdf(file = file.path("plots", "calendar_subset_direction.pdf"), width = 12, height = 7)
+direction_plot_subset
+dev.off()
+
+pdf(file = file.path("plots", "calendar_subset_convergence.pdf"), width = 15.5, height = 8)
+convergence_plot_subset
+dev.off()
 
 
