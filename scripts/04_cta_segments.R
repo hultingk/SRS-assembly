@@ -21,7 +21,6 @@ srs_data_wider <- srs_data %>%
   dplyr::count(unique_id, time, year, sppcode) %>%
   pivot_wider(names_from = sppcode, values_from = n, values_fill = 0) # wide format
 
-
 # make factor
 srs_data_wider$time <- as.numeric(srs_data_wider$time)
 srs_data_wider$unique_id <- as.factor(srs_data_wider$unique_id)
@@ -45,7 +44,6 @@ jaccard_dist <- vegdist(sp_info, method = "jaccard")
 
 # defining trajectories
 srs_trajectory <- defineTrajectories(jaccard_dist, sites = patch_info$unique_id, surveys = patch_info$time)
-
 
 # segment lengths of trajectories between consectutive years
 segment_lengths <- trajectoryLengths(srs_trajectory)
@@ -217,12 +215,6 @@ anova.animal.length <- Anova(m_length_animal_null, type = "III")
 
 
 
-
-
-
-
-
-
 #####################
 #### GRAVITY ####
 #####################
@@ -308,8 +300,6 @@ anova.gravity.length <- Anova(m_length_gravity_quad, type = "III")
 m_length_gravity_posthoc <- emmeans(m_length_gravity_quad, ~ patch_type*s.time + patch_type * I(s.time^2), at = list(s.time = c(0)))
 m_length_gravity_pairs <- pairs(m_length_gravity_posthoc, simple = "patch_type")
 m_length_gravity_pairs
-
-
 
 
 

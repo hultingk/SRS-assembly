@@ -12,9 +12,6 @@ librarian::shelf(tidyverse, vegan, ape, BiodiversityR, glmmTMB)
 # loading data
 srs_data <- read_csv(file = file.path("data", "L1_wrangled", "srs_plant_all.csv"))
 
-# srs_data <- srs_data %>% 
-#   filter(transplant != TRUE) %>% # removing experimentally planted species 
-#   filter(patch_type != "Center") # removing center patch from analysis
 
 # pivot to wider format
 srs_data_wider <- srs_data %>%
@@ -49,27 +46,21 @@ jaccard_dist_all_df <- cbind(patch_info, jaccard_dist_all_df) # merge with patch
 
 # pcoa
 pcoa_all <- pcoa(jaccard_dist)
-pcoa_all_cmd <- cmdscale(jaccard_dist, eig=TRUE, add=FALSE)  ## Another way of doing the pcoa that gives same results#
-
 
 # add axes to patch and time
 pcoa_axes <- pcoa_all$vectors[,c(1,2)]
 pcoa_axes <- cbind(patch_info, pcoa_axes)
-
-
 
 #### plotting ####
 pcoa_axes_plot <- pcoa_axes %>%
   separate(unique_id, into = c("block", "patch_rep", "patch_type"), sep = "-", remove = F)
 pcoa_axes_plot$time <- as.numeric(pcoa_axes_plot$time)
 
-
 # separating into group of blocks with duplicate rectanglar patches and group of blocks with duplicate winged patches
 duplicate_wing <- pcoa_axes_plot %>%
   filter(block %in% c("08", "52", "53N", "53S", "75E"))
 duplicate_rectangle <- pcoa_axes_plot %>%
   filter(block %in% c("10", "54N", "54S", "57", "75W"))
-
 
 # PCOA plot for blocks with duplicate winged patch
 duplicate_wing_names <- c( # assinging patch rep letters to patch types

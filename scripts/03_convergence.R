@@ -57,8 +57,6 @@ converge.aic.table
 summary(m.converge_quad)
 
 
-
-
 # percent change in dissimilarity from year 1-21 (20 years)
 # time 1 = -1.519113
 # time 21 = 1.436766
@@ -101,13 +99,11 @@ plot(simulateResiduals(m.converge_quad))
 #check_model(m.converge_quad)
 performance::r2(m.converge_quad)
 
-
 ## posthoc comparisons
 m.converge_posthoc <- emmeans(m.converge_quad, ~ patch_pair*s.time+ patch_pair * I(s.time^2))
 m.converge_pairs <- pairs(m.converge_posthoc, simple = "patch_pair")
 m.converge_pairs
 
-m.converge_posthoc
 # % increase in dissimilarity from (connected-winged) to (connected-rectangular)
 (0.385-0.359)/0.359 * 100 # connected patches are %7.24234 more similar to winged patches than rectangular patches across time
 #95% CI
@@ -240,8 +236,6 @@ anova.gravity.converge <- Anova(m.converge_gravity_quad, type = "III")
 m.converge_gravity_posthoc <- emmeans(m.converge_gravity_quad, ~ patch_pair*s.time + patch_pair * I(s.time^2))
 m.converge_gravity_pairs <- pairs(m.converge_gravity_posthoc, simple = "patch_pair")
 m.converge_gravity_pairs
-
-
 
 
 
