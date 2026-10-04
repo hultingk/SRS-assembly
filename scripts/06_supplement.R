@@ -396,8 +396,8 @@ figureS4 <- srs_dispersal_prop %>%
   geom_point(alpha = 0.1, size = 3) +
   geom_smooth(method = "lm", formula = y ~ x + I(x^2), alpha = 0.2, linewidth = 2) +
   facet_wrap(~patch_type, scales = "free", labeller = as_labeller(c("Connected" = "(A) Connected", "Rectangular" = "(B) Rectangular", "Winged" = "(C) Winged"))) +
-  theme_minimal(base_size = 24) +
-  theme(axis.text = element_text(size = 18)) +
+  theme_minimal(base_size = 18) +
+  theme(axis.text = element_text(size = 16)) +
   theme(panel.border = element_rect(colour = "darkgrey", fill=NA, linewidth=1),
         panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(),

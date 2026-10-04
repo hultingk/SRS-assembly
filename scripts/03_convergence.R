@@ -518,7 +518,7 @@ dispersal_mode_convergence_2$dispersal_mode <- factor(dispersal_mode_convergence
 # first set of plots
 converge_plot_1 <- predict_converge_1 %>%
   ggplot() +
-  #geom_point(aes(time, jaccard, color = patch_pair), size = 3, alpha = 0.05, data = dispersal_mode_convergence_1) +
+  geom_point(aes(time, jaccard, color = patch_pair), size = 3, alpha = 0.05, data = dispersal_mode_convergence_1) +
   geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(time, predicted, color = group), linewidth = 3) +
   facet_wrap(~dispersal_mode, scales = "free", labeller = as_labeller(c("All Species" = "(A) All species", "Animal" = "(B) Animal-dispersed"))) +
@@ -537,7 +537,7 @@ converge_plot_1 <- predict_converge_1 %>%
   guides(fill=guide_legend(ncol=1)) +
   guides(color=guide_legend(ncol=1)) +
   #ylim(0.25, 0.55) +
-  scale_y_continuous(limits = c(0.25, 0.47), labels = label_number(accuracy = 0.01)) +
+  # scale_y_continuous(limits = c(0.25, 0.47), labels = label_number(accuracy = 0.01)) +
   theme(axis.text = element_text(size = 16)) +
   theme(legend.position = "none") 
 converge_plot_1
@@ -545,7 +545,7 @@ converge_plot_1
 # second set of plots
 converge_plot_2 <- predict_converge_2 %>%
   ggplot() +
-  #geom_point(aes(time, jaccard, color = patch_pair), size = 3, alpha = 0.05, data = dispersal_mode_convergence_2) +
+  geom_point(aes(time, jaccard, color = patch_pair), size = 3, alpha = 0.05, data = dispersal_mode_convergence_2) +
   geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(time, predicted, color = group), linewidth = 3) +
   facet_wrap(~dispersal_mode, scales = "free", labeller = as_labeller(c("Gravity" = "(C) Gravity-dispersed", "Wind" = "(D) Wind-dispersed"))) +
@@ -563,7 +563,7 @@ converge_plot_2 <- predict_converge_2 %>%
   ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
   guides(fill=guide_legend(ncol=1)) +
   #ylim(0.25, 0.55) +
-  scale_y_continuous(limits = c(0.32, 0.55), labels = label_number(accuracy = 0.01)) +
+  # scale_y_continuous(limits = c(0.32, 0.55), labels = label_number(accuracy = 0.01)) +
   guides(color=guide_legend(ncol=1)) +
   theme(axis.text = element_text(size = 16)) +
   theme(legend.position = "none") 
@@ -604,119 +604,4 @@ figure4
 # pdf(file = file.path("plots", "figure4_legend.pdf"), width = 11.5, height = 1.5)
 # plot(l)
 # dev.off()
-
-
-### individual total plot
-
-### plotting model predictions
-#creating key of scaled times to join to predictions for easy visualization
-scaled_time_key <- convergence_jaccard %>%
-  count(time, s.time) %>%
-  dplyr::select(-n) %>%
-  mutate(s.time = round(s.time, 2))
-
-# model predictions
-m.converge.predict <- ggpredict(m.converge_quad, terms=c("s.time [all]", "patch_pair [all]"), back_transform = T)
-m.converge.predict <- as.data.frame(m.converge.predict)
-m.converge.predict$dispersal_mode <- "Total"
-# plotting
-convergence_plot <- m.converge.predict %>%
-  left_join(scaled_time_key, by = c("x" = "s.time")) %>%
-  ggplot() +
-  geom_point(aes(time, jaccard, color = patch_pair), size = 4, alpha = 0.07, data = convergence_jaccard) +
-  geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
-  geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 28) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
-                                                                            expression("Connected"%<->%"Winged"),
-                                                                            expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
-  scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
-                                                                             expression("Connected"%<->%"Winged"),
-                                                                             expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
-  xlab("Years since site creation") +
-  ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
-  guides(fill=guide_legend(ncol=1)) +
-  #ylim(0.23, 0.55) +
-  scale_y_continuous(limits = c(0.23, 0.55), labels = label_number(accuracy = 0.01)) +
-  guides(color=guide_legend(ncol=1)) +
-  theme(axis.text = element_text(size = 16),
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  theme(legend.position = "right") 
-convergence_plot
-
-# pdf(file = file.path("plots", "convergence_plot.pdf"), width = 14, height = 8)
-# convergence_plot
-# dev.off()
-
-
-
-### three dispersal mode plot
-predict_converge_mode <- rbind(
-  m.converge_animal.predict, m.converge_wind.predict, m.converge_gravity.predict
-)
-
-
-# creating key of scaled times to join to predictions for easy visualization
-scaled_time_key <- convergence_jaccard %>%
-  count(time, s.time) %>%
-  dplyr::select(-n) %>%
-  mutate(s.time = round(s.time, 2))
-
-# joining with time
-predict_converge_mode <- predict_converge_mode %>%
-  left_join(scaled_time_key, by = c("x" = "s.time"))
-
-predict_converge_mode$dispersal_mode <- factor(predict_converge_mode$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
-
-# joining together data points
-dispersal_mode_convergence_points <- rbind(
-  animal_convergence_jaccard, wind_convergence_jaccard, gravity_convergence_jaccard
-)
-dispersal_mode_convergence_points$dispersal_mode <- factor(dispersal_mode_convergence_points$dispersal_mode, levels = c("Animal", "Wind", "Gravity"))
-
-# first set of plots
-converge_plot_mode <- predict_converge_mode %>%
-  ggplot() +
-  geom_point(aes(time, jaccard, color = patch_pair), size = 3, alpha = 0.05, data = dispersal_mode_convergence_points) +
-  geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.30) +
-  geom_line(aes(time, predicted, color = group), linewidth = 3) +
-  facet_wrap(~dispersal_mode, scales = "free", labeller = as_labeller(c("Animal" = "(A) Animal-dispersed", "Wind" = "(B) Wind-dispersed", "Gravity" = "(C) Gravity-dispersed"))) +
-  theme_minimal(base_size = 26) +
-  theme(panel.border = element_rect(color = "black", fill=NA, linewidth=1),
-        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.5),
-        strip.text.x = element_text(hjust = -0.05),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
-                                                                            expression("Connected"%<->%"Winged"),
-                                                                            expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
-  scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), labels = c(expression("Connected"%<->%"Rectangular"), 
-                                                                             expression("Connected"%<->%"Winged"),
-                                                                             expression("Rectangular"%<->%"Winged")), name = "Patch Comparison") +
-  xlab(NULL) +
-  ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
-  guides(fill=guide_legend(ncol=1)) +
-  guides(color=guide_legend(ncol=1)) +
-  #ylim(0.25, 0.55) +
-  #scale_y_continuous(limits = c(0.25, 0.47), labels = label_number(accuracy = 0.01)) +
-  theme(axis.text = element_text(size = 16)) +
-  theme(legend.position = "bottom") 
-converge_plot_mode
-
-
-pdf(file = file.path("plots", "dispersal_mode_convergence_plot.pdf"), width = 14, height = 6)
-converge_plot_mode
-dev.off()
 
