@@ -16,75 +16,75 @@ source(here::here(file.path("scripts", "04_cta_segments.R")))
 ########################
 ## directionality broken into time periods 
 ###### directionality in first 12 years ###
-sp_info_1_12 <- srs_data_wider %>%
-  filter(time <= 12)
+sp_info_first <- srs_data_wider %>%
+  filter(time <= 15)
 
-patch_info_1_12 <- sp_info_1_12 %>%
+patch_info_first <- sp_info_first %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-sp_info_1_12 <- sp_info_1_12 %>%
+sp_info_first <- sp_info_first %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-jaccard_dist_1_12 <- vegdist(sp_info_1_12, method = "jaccard")
+jaccard_dist_first <- vegdist(sp_info_first, method = "jaccard")
 
 # defining trajectories
-srs_trajectory_1_12 <- defineTrajectories(jaccard_dist_1_12, sites = patch_info_1_12$unique_id, surveys = patch_info_1_12$time)
+srs_trajectory_first <- defineTrajectories(jaccard_dist_first, sites = patch_info_first$unique_id, surveys = patch_info_first$time)
 
 # directionality
-segment_direction_1_12 <- trajectoryDirectionality(srs_trajectory_1_12)
-segment_direction_1_12 <- data.frame(segment_direction_1_12)
-segment_direction_1_12 <- segment_direction_1_12 %>%
+segment_direction_first <- trajectoryDirectionality(srs_trajectory_first)
+segment_direction_first <- data.frame(segment_direction_first)
+segment_direction_first <- segment_direction_first %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 1-12") %>%
-  rename(directionality = segment_direction_1_12)
+  mutate(time = "Year 1-15") %>%
+  rename(directionality = segment_direction_first)
 
 
 ###### directionality in second 12 years ###
-sp_info_13_24 <- srs_data_wider %>%
-  filter(time >= 13) %>%
+sp_info_second <- srs_data_wider %>%
+  filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
-  filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
+  filter(!block %in% c("57", "52")) %>% # 57 and 52 only has 2 years of surveys after year 16 -- not enough to calculate directionality
   mutate(unique_id = paste(block, patch, patch_type, sep = "-")) 
   
 
-patch_info_13_24 <- sp_info_13_24 %>% 
+patch_info_second <- sp_info_second %>% 
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-sp_info_13_24 <- sp_info_13_24 %>%
+sp_info_second <- sp_info_second %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year", "block", "patch", "patch_type"))
 
 # Jaccard distance matrix
-jaccard_dist_13_24 <- vegdist(sp_info_13_24, method = "jaccard")
+jaccard_dist_second <- vegdist(sp_info_second, method = "jaccard")
 
 # defining trajectories
-srs_trajectory_13_24 <- defineTrajectories(jaccard_dist_13_24, sites = patch_info_13_24$unique_id, surveys = patch_info_13_24$time)
+srs_trajectory_second <- defineTrajectories(jaccard_dist_second, sites = patch_info_second$unique_id, surveys = patch_info_second$time)
 
 # directionality
-segment_direction_13_24 <- trajectoryDirectionality(srs_trajectory_13_24)
-segment_direction_13_24 <- data.frame(segment_direction_13_24)
-segment_direction_13_24 <- segment_direction_13_24 %>%
+segment_direction_second <- trajectoryDirectionality(srs_trajectory_second)
+segment_direction_second <- data.frame(segment_direction_second)
+segment_direction_second <- segment_direction_second %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 13-24") %>%
-  rename(directionality = segment_direction_13_24)
+  mutate(time = "Year 16-24") %>%
+  rename(directionality = segment_direction_second)
 
 
 #### putting all together
 segment_direction_all <- rbind(
-  segment_direction_1_12,
-  segment_direction_13_24
+  segment_direction_first,
+  segment_direction_second
 )
 segment_direction_all$dispersal_mode <- "All Species"
 
@@ -118,73 +118,73 @@ confint(m.direction)
 ###############################
 animal_data$time <- as.numeric(animal_data$time)
 # first 12 years
-animal_1_12 <- animal_data %>%
-  filter(time <= 12)
+animal_first <- animal_data %>%
+  filter(time <= 15)
 
 # patch info
-animal_patch_info_1_12 <- animal_1_12 %>%
+animal_patch_info_first <- animal_first %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-animal_1_12 <- animal_1_12 %>%
+animal_first <- animal_first %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-animal_jaccard_dist_1_12 <- vegdist(animal_1_12, method = "jaccard")
+animal_jaccard_dist_first <- vegdist(animal_first, method = "jaccard")
 # defining trajectories
-animal_trajectory_1_12 <- defineTrajectories(animal_jaccard_dist_1_12, sites = animal_patch_info_1_12$unique_id, surveys = animal_patch_info_1_12$time)
+animal_trajectory_first <- defineTrajectories(animal_jaccard_dist_first, sites = animal_patch_info_first$unique_id, surveys = animal_patch_info_first$time)
 
 # directionality
-animal_direction_1_12 <- trajectoryDirectionality(animal_trajectory_1_12)
-animal_direction_1_12 <- data.frame(animal_direction_1_12)
-animal_direction_1_12 <- animal_direction_1_12 %>%
+animal_direction_first <- trajectoryDirectionality(animal_trajectory_first)
+animal_direction_first <- data.frame(animal_direction_first)
+animal_direction_first <- animal_direction_first %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 1-12") %>%
-  rename(directionality = animal_direction_1_12)
+  mutate(time = "Year 1-15") %>%
+  rename(directionality = animal_direction_first)
 
 
 # second half of succession
-animal_13_24 <- animal_data %>%
-  filter(time >= 13) %>%
+animal_second <- animal_data %>%
+  filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
-  filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
+  filter(!block %in% c("57", "52")) %>% # 57 and 52 only has 2 years of surveys after year 16 -- not enough to calculate directionality
   mutate(unique_id = paste(block, patch, patch_type, sep = "-")) 
 
 # patch info
-animal_patch_info_13_24 <- animal_13_24 %>%
+animal_patch_info_second <- animal_second %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-animal_13_24 <- animal_13_24 %>%
+animal_second <- animal_second %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year", "block", "patch", "patch_type"))
 
 # Jaccard distance matrix
-animal_jaccard_dist_13_24 <- vegdist(animal_13_24, method = "jaccard")
+animal_jaccard_dist_second <- vegdist(animal_second, method = "jaccard")
 # defining trajectories
-animal_trajectory_13_24 <- defineTrajectories(animal_jaccard_dist_13_24, sites = animal_patch_info_13_24$unique_id, surveys = animal_patch_info_13_24$time)
+animal_trajectory_second <- defineTrajectories(animal_jaccard_dist_second, sites = animal_patch_info_second$unique_id, surveys = animal_patch_info_second$time)
 
 # directionality
-animal_direction_13_24 <- trajectoryDirectionality(animal_trajectory_13_24)
-animal_direction_13_24 <- data.frame(animal_direction_13_24)
-animal_direction_13_24 <- animal_direction_13_24 %>%
+animal_direction_second <- trajectoryDirectionality(animal_trajectory_second)
+animal_direction_second <- data.frame(animal_direction_second)
+animal_direction_second <- animal_direction_second %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 13-24") %>%
-  rename(directionality = animal_direction_13_24)
+  mutate(time = "Year 16-24") %>%
+  rename(directionality = animal_direction_second)
 
 #### putting all together
 animal_direction_all <- rbind(
-  animal_direction_1_12,
-  animal_direction_13_24
+  animal_direction_first,
+  animal_direction_second
 )
 animal_direction_all$dispersal_mode <- "Animal"
 
@@ -211,73 +211,73 @@ m.animal_direction_pairs2
 
 gravity_data$time <- as.numeric(gravity_data$time)
 # first 12 years
-gravity_1_12 <- gravity_data %>%
-  filter(time <= 12)
+gravity_first <- gravity_data %>%
+  filter(time <= 15)
 
 # patch info
-gravity_patch_info_1_12 <- gravity_1_12 %>%
+gravity_patch_info_first <- gravity_first %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-gravity_1_12 <- gravity_1_12 %>%
+gravity_first <- gravity_first %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-gravity_jaccard_dist_1_12 <- vegdist(gravity_1_12, method = "jaccard")
+gravity_jaccard_dist_first <- vegdist(gravity_first, method = "jaccard")
 # defining trajectories
-gravity_trajectory_1_12 <- defineTrajectories(gravity_jaccard_dist_1_12, sites = gravity_patch_info_1_12$unique_id, surveys = gravity_patch_info_1_12$time)
+gravity_trajectory_first <- defineTrajectories(gravity_jaccard_dist_first, sites = gravity_patch_info_first$unique_id, surveys = gravity_patch_info_first$time)
 
 # directionality
-gravity_direction_1_12 <- trajectoryDirectionality(gravity_trajectory_1_12)
-gravity_direction_1_12 <- data.frame(gravity_direction_1_12)
-gravity_direction_1_12 <- gravity_direction_1_12 %>%
+gravity_direction_first <- trajectoryDirectionality(gravity_trajectory_first)
+gravity_direction_first <- data.frame(gravity_direction_first)
+gravity_direction_first <- gravity_direction_first %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 1-12") %>%
-  rename(directionality = gravity_direction_1_12)
+  mutate(time = "Year 1-15") %>%
+  rename(directionality = gravity_direction_first)
 
 
 # second half of succession
-gravity_13_24 <- gravity_data %>%
-  filter(time >= 13) %>%
+gravity_second <- gravity_data %>%
+  filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
-  filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
+  filter(!block %in% c("57", "52")) %>% # 57 and 52 only has 2 years of surveys after year 16 -- not enough to calculate directionality
   mutate(unique_id = paste(block, patch, patch_type, sep = "-")) 
 
 # patch info
-gravity_patch_info_13_24 <- gravity_13_24 %>%
+gravity_patch_info_second <- gravity_second %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-gravity_13_24 <- gravity_13_24 %>%
+gravity_second <- gravity_second %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year", "block", "patch", "patch_type"))
 
 # Jaccard distance matrix
-gravity_jaccard_dist_13_24 <- vegdist(gravity_13_24, method = "jaccard")
+gravity_jaccard_dist_second <- vegdist(gravity_second, method = "jaccard")
 # defining trajectories
-gravity_trajectory_13_24 <- defineTrajectories(gravity_jaccard_dist_13_24, sites = gravity_patch_info_13_24$unique_id, surveys = gravity_patch_info_13_24$time)
+gravity_trajectory_second <- defineTrajectories(gravity_jaccard_dist_second, sites = gravity_patch_info_second$unique_id, surveys = gravity_patch_info_second$time)
 
 # directionality
-gravity_direction_13_24 <- trajectoryDirectionality(gravity_trajectory_13_24)
-gravity_direction_13_24 <- data.frame(gravity_direction_13_24)
-gravity_direction_13_24 <- gravity_direction_13_24 %>%
+gravity_direction_second <- trajectoryDirectionality(gravity_trajectory_second)
+gravity_direction_second <- data.frame(gravity_direction_second)
+gravity_direction_second <- gravity_direction_second %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 13-24") %>%
-  rename(directionality = gravity_direction_13_24)
+  mutate(time = "Year 16-24") %>%
+  rename(directionality = gravity_direction_second)
 
 #### putting all together
 gravity_direction_all <- rbind(
-  gravity_direction_1_12,
-  gravity_direction_13_24
+  gravity_direction_first,
+  gravity_direction_second
 )
 gravity_direction_all$dispersal_mode <- "Gravity"
 
@@ -303,73 +303,73 @@ m.gravity_direction_pairs2
 
 wind_data$time <- as.numeric(wind_data$time)
 # first 12 years
-wind_1_12 <- wind_data %>%
-  filter(time <= 12)
+wind_first <- wind_data %>%
+  filter(time <= 15)
 
 # patch info
-wind_patch_info_1_12 <- wind_1_12 %>%
+wind_patch_info_first <- wind_first %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-wind_1_12 <- wind_1_12 %>%
+wind_first <- wind_first %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-wind_jaccard_dist_1_12 <- vegdist(wind_1_12, method = "jaccard")
+wind_jaccard_dist_first <- vegdist(wind_first, method = "jaccard")
 # defining trajectories
-wind_trajectory_1_12 <- defineTrajectories(wind_jaccard_dist_1_12, sites = wind_patch_info_1_12$unique_id, surveys = wind_patch_info_1_12$time)
+wind_trajectory_first <- defineTrajectories(wind_jaccard_dist_first, sites = wind_patch_info_first$unique_id, surveys = wind_patch_info_first$time)
 
 # directionality
-wind_direction_1_12 <- trajectoryDirectionality(wind_trajectory_1_12)
-wind_direction_1_12 <- data.frame(wind_direction_1_12)
-wind_direction_1_12 <- wind_direction_1_12 %>%
+wind_direction_first <- trajectoryDirectionality(wind_trajectory_first)
+wind_direction_first <- data.frame(wind_direction_first)
+wind_direction_first <- wind_direction_first %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 1-12") %>%
-  rename(directionality = wind_direction_1_12)
+  mutate(time = "Year 1-15") %>%
+  rename(directionality = wind_direction_first)
 
 
 # second half of succession
-wind_13_24 <- wind_data %>%
-  filter(time >= 13) %>%
+wind_second <- wind_data %>%
+  filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
-  filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
+  filter(!block %in% c("57", "52")) %>% # 57 and 52 only has 2 years of surveys after year 16 -- not enough to calculate directionality
   mutate(unique_id = paste(block, patch, patch_type, sep = "-")) 
 
 # patch info
-wind_patch_info_13_24 <- wind_13_24 %>%
+wind_patch_info_second <- wind_second %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-wind_13_24 <- wind_13_24 %>%
+wind_second <- wind_second %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year", "block", "patch", "patch_type"))
 
 # Jaccard distance matrix
-wind_jaccard_dist_13_24 <- vegdist(wind_13_24, method = "jaccard")
+wind_jaccard_dist_second <- vegdist(wind_second, method = "jaccard")
 # defining trajectories
-wind_trajectory_13_24 <- defineTrajectories(wind_jaccard_dist_13_24, sites = wind_patch_info_13_24$unique_id, surveys = wind_patch_info_13_24$time)
+wind_trajectory_second <- defineTrajectories(wind_jaccard_dist_second, sites = wind_patch_info_second$unique_id, surveys = wind_patch_info_second$time)
 
 # directionality
-wind_direction_13_24 <- trajectoryDirectionality(wind_trajectory_13_24)
-wind_direction_13_24 <- data.frame(wind_direction_13_24)
-wind_direction_13_24 <- wind_direction_13_24 %>%
+wind_direction_second <- trajectoryDirectionality(wind_trajectory_second)
+wind_direction_second <- data.frame(wind_direction_second)
+wind_direction_second <- wind_direction_second %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 13-24") %>%
-  rename(directionality = wind_direction_13_24)
+  mutate(time = "Year 16-24") %>%
+  rename(directionality = wind_direction_second)
 
 #### putting all together
 wind_direction_all <- rbind(
-  wind_direction_1_12,
-  wind_direction_13_24
+  wind_direction_first,
+  wind_direction_second
 )
 wind_direction_all$dispersal_mode <- "Wind"
 
@@ -440,7 +440,7 @@ tableS7 <- m.direction_anova_all %>%
 tableS7
 
 # exporting
-#save_kable(tableS7, file = file.path("tables", "tableS7.html"))
+save_kable(tableS7, file = file.path("tables", "tableS7-REVISION.html"))
 
 # emmeans posthoc tables
 # creating dataframes of results
@@ -482,7 +482,7 @@ tableS8 <- m_direction_table_all %>%
 tableS8
 
 # exporting
-save_kable(tableS8, file = file.path("tables", "tableS8.html"))
+save_kable(tableS8, file = file.path("tables", "tableS8-REVISION.html"))
 
 
 # creating dataframes of results
@@ -524,7 +524,7 @@ tableS9 <- m_direction_table_all2 %>%
 tableS9
 
 # exporting
-save_kable(tableS9, file = file.path("tables", "tableS9.html"))
+save_kable(tableS9, file = file.path("tables", "tableS9-REVISION.html"))
 
 
 
@@ -667,7 +667,7 @@ figure3 <- cowplot::plot_grid(direction_predict_plot_1, direction_predict_plot_2
 figure3
 
 # # exporting
-# pdf(file = file.path("plots", "figure3.pdf"), width = 12.5, height = 13)
+# pdf(file = file.path("plots", "figure3-REVISION.pdf"), width = 12.5, height = 13)
 # figure3
 # dev.off()
 
