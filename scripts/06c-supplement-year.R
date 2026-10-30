@@ -3,6 +3,7 @@
 librarian::shelf(tidyverse, vegan, ecotraj, glmmTMB, DHARMa, emmeans, ggeffects, 
                  AICcmodavg, performance, cowplot, kableExtra, car, scales) # Install missing packages and load needed libraries
 
+# loading functions
 source(here::here(file.path("scripts", "00_functions.R")))
 
 # loading data
@@ -87,7 +88,7 @@ all_segment_plot_year <- m_length_predict_year %>%
   geom_point(aes(year_plotting, distance, color = patch_type), size = 6, alpha = 0.15, data = segment_lengths_year) +
   geom_ribbon(aes(x = year, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(year, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 32) +
+  theme_minimal(base_size = 34) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -97,12 +98,9 @@ all_segment_plot_year <- m_length_predict_year %>%
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
   xlab("Calendar year") +
   ylab(expression(atop("Trajectory distance", paste("between consecutive surveys")))) +
-  #guides(fill=guide_legend(ncol=1)) +
-  #guides(color=guide_legend(ncol=1)) +
-  #scale_y_continuous(limits = c(0.19, 0.38), labels = label_number(accuracy = 0.01)) +
-  theme(axis.text = element_text(size = 20), 
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
+  theme(axis.text = element_text(size = 26), 
+        legend.text = element_text(size = 30),
+        legend.title = element_text(size = 30),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(legend.position = "right")
@@ -111,76 +109,76 @@ all_segment_plot_year
 
 #### Directionality ####
 ## directionality broken into time periods 
-###### directionality in first 12 years ###
+###### directionality in first part ###
 srs_data_year_wider <- srs_data_year_wider %>% # making calendar year a number for analysis
   mutate(year_numeric = as.numeric(sub("^20", "", year)))
 
-sp_info_1_12_year <- srs_data_year_wider %>%
-  filter(year_numeric <= 12)
+sp_info_1_15_year <- srs_data_year_wider %>%
+  filter(year_numeric <= 15)
 
-patch_info_1_12_year <- sp_info_1_12_year %>%
+patch_info_1_15_year <- sp_info_1_15_year %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-sp_info_1_12_year <- sp_info_1_12_year %>%
+sp_info_1_15_year <- sp_info_1_15_year %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-jaccard_dist_1_12_year <- vegdist(sp_info_1_12_year, method = "jaccard")
+jaccard_dist_1_15_year <- vegdist(sp_info_1_15_year, method = "jaccard")
 
 # defining trajectories
-srs_trajectory_1_12_year <- defineTrajectories(jaccard_dist_1_12_year, sites = patch_info_1_12_year$unique_id, surveys = patch_info_1_12_year$time)
+srs_trajectory_1_15_year <- defineTrajectories(jaccard_dist_1_15_year, sites = patch_info_1_15_year$unique_id, surveys = patch_info_1_15_year$time)
 
 # directionality
-segment_direction_1_12_year <- trajectoryDirectionality(srs_trajectory_1_12_year)
-segment_direction_1_12_year <- data.frame(segment_direction_1_12_year)
-segment_direction_1_12_year <- segment_direction_1_12_year %>%
+segment_direction_1_15_year <- trajectoryDirectionality(srs_trajectory_1_15_year)
+segment_direction_1_15_year <- data.frame(segment_direction_1_15_year)
+segment_direction_1_15_year <- segment_direction_1_15_year %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 1-12") %>%
-  rename(directionality = segment_direction_1_12_year)
+  mutate(time = "Year 1-15") %>%
+  rename(directionality = segment_direction_1_15_year)
 
-###### directionality in second 12 years ###
-sp_info_13_24_year <- srs_data_year_wider %>%
-  filter(year_numeric >= 13) %>%
+###### directionality in second part ###
+sp_info_16_24_year <- srs_data_year_wider %>%
+  filter(year_numeric >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
-  filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
+  #filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
   mutate(unique_id = paste(block, patch, patch_type, sep = "-")) 
 
-patch_info_13_24_year <- sp_info_13_24_year %>% 
+patch_info_16_24_year <- sp_info_16_24_year %>% 
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-sp_info_13_24_year <- sp_info_13_24_year %>%
+sp_info_16_24_year <- sp_info_16_24_year %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year", "block", "patch", "patch_type"))
 
 # Jaccard distance matrix
-jaccard_dist_13_24_year <- vegdist(sp_info_13_24_year, method = "jaccard")
+jaccard_dist_16_24_year <- vegdist(sp_info_16_24_year, method = "jaccard")
 
 # defining trajectories
-srs_trajectory_13_24_year <- defineTrajectories(jaccard_dist_13_24_year, sites = patch_info_13_24_year$unique_id, surveys = patch_info_13_24_year$time)
+srs_trajectory_16_24_year <- defineTrajectories(jaccard_dist_16_24_year, sites = patch_info_16_24_year$unique_id, surveys = patch_info_16_24_year$time)
 
 # directionality
-segment_direction_13_24_year <- trajectoryDirectionality(srs_trajectory_13_24_year)
-segment_direction_13_24_year <- data.frame(segment_direction_13_24_year)
-segment_direction_13_24_year <- segment_direction_13_24_year %>%
+segment_direction_16_24_year <- trajectoryDirectionality(srs_trajectory_16_24_year)
+segment_direction_16_24_year <- data.frame(segment_direction_16_24_year)
+segment_direction_16_24_year <- segment_direction_16_24_year %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 13-24") %>%
-  rename(directionality = segment_direction_13_24_year)
+  mutate(time = "Year 16-24") %>%
+  rename(directionality = segment_direction_16_24_year)
 
 #### putting all together
 segment_direction_all_year <- rbind(
-  segment_direction_1_12_year,
-  segment_direction_13_24_year
+  segment_direction_1_15_year,
+  segment_direction_16_24_year
 )
 segment_direction_all_year$dispersal_mode <- "All Species"
 
@@ -210,8 +208,7 @@ direction_plot_year <- m.direction.predict_year %>%
              position = position_jitterdodge(jitter.width = 0.2, jitter.height = 0, dodge.width = 0.7)) +
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = group), color = "black",
                 data = m.direction.predict_year, width = 0, linewidth = 3,  position = position_dodge(width = 0.7)) +
-  #scale_y_continuous(limits = c(0.32, 0.38), labels = label_number(accuracy = 0.01)) +
-  theme_minimal(base_size = 26) +
+  theme_minimal(base_size = 32) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -227,8 +224,8 @@ direction_plot_year <- m.direction.predict_year %>%
        y = "Trajectory directionality") +
   scale_x_discrete(
     labels = c(
-      "Year 1-12" = "Year 2000-2012",
-      "Year 13-24" = "Year 2013-2024"
+      "Year 1-15" = "Year 2000-2015",
+      "Year 16-24" = "Year 2016-2024"
     )) +
   scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
                     labels = c("Connected", "Rectangular", "Winged"), 
@@ -236,7 +233,9 @@ direction_plot_year <- m.direction.predict_year %>%
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
                      labels = c("Connected", "Rectangular", "Winged"), 
                      name = "Patch Type") +
-  theme(axis.text = element_text(size = 18)) +
+  theme(axis.text = element_text(size = 26), 
+        legend.text = element_text(size = 28),
+        legend.title = element_text(size = 28)) +
   theme(legend.position = "right") 
 direction_plot_year
 
@@ -294,7 +293,7 @@ convergence_plot_year <- m.converge.predict_year %>%
   geom_point(aes(year_plotting, jaccard, color = patch_pair), size = 6, alpha = 0.07, data = convergence_jaccard_year) +
   geom_ribbon(aes(x = year, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(year, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 28) +
+  theme_minimal(base_size = 34) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -312,9 +311,9 @@ convergence_plot_year <- m.converge.predict_year %>%
   ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
   guides(fill=guide_legend(ncol=1)) +
   guides(color=guide_legend(ncol=1)) +
-  theme(axis.text = element_text(size = 16),
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
+  theme(axis.text = element_text(size = 26),
+        legend.text = element_text(size = 30),
+        legend.title = element_text(size = 30),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(legend.position = "right") 
@@ -322,17 +321,17 @@ convergence_plot_year
 
 
 #### exporting plots ####
-pdf(file = file.path("plots", "calendar_year_length.pdf"), width = 14, height = 8)
-all_segment_plot_year
-dev.off()
-
-pdf(file = file.path("plots", "calendar_year_direction.pdf"), width = 12, height = 7)
-direction_plot_year
-dev.off()
-
-pdf(file = file.path("plots", "calendar_year_convergence.pdf"), width = 15.5, height = 8)
-convergence_plot_year
-dev.off()
+# pdf(file = file.path("plots", "calendar_year_length.pdf"), width = 14, height = 8)
+# all_segment_plot_year
+# dev.off()
+# 
+# pdf(file = file.path("plots", "calendar_year_direction.pdf"), width = 13, height = 8)
+# direction_plot_year
+# dev.off()
+# 
+# pdf(file = file.path("plots", "calendar_year_convergence.pdf"), width = 16, height = 8)
+# convergence_plot_year
+# dev.off()
 
 
 

@@ -2,12 +2,12 @@
 ## SCRIPT NAME: 02_pcoa.R
 ## AUTHOR: Katherine Hulting
 ## PURPOSE: Visualize PCoA of community trajectories
-## PRODUCTS: figureS1.pdf : supplementary figure of PCoA visualization
+## PRODUCTS: figureS2.pdf : supplementary figure of PCoA visualization
 #########
 
 
 # loading libraries
-librarian::shelf(tidyverse, vegan, ape, BiodiversityR, glmmTMB)
+librarian::shelf(tidyverse, vegan, ape, glmmTMB)
 
 # loading data
 srs_data <- read_csv(file = file.path("data", "L1_wrangled", "srs_plant_all.csv"))
@@ -119,12 +119,12 @@ duplicate_rectangle_pcoa <- duplicate_rectangle %>%
 duplicate_rectangle_pcoa
 
 # putting plots together
-figureS1 <- cowplot::plot_grid(duplicate_wing_pcoa, duplicate_rectangle_pcoa, rel_widths = c(1, 1.1))
-figureS1
+figureS2 <- cowplot::plot_grid(duplicate_wing_pcoa, duplicate_rectangle_pcoa, rel_widths = c(1, 1.1))
+figureS2
 
 # exporting
-# pdf(file = file.path("plots", "figureS1.pdf"), width = 22, height =12.5)
-# figureS1
+# pdf(file = file.path("plots", "figureS2.pdf"), width = 22, height =12.5)
+# figureS2
 # dev.off()
 
 

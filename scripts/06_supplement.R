@@ -2,7 +2,7 @@
 ## SCRIPT NAME: 05_supplement.R
 ## AUTHOR: Katherine Hulting
 ## PURPOSE: Supplemental exploratory plots: species richness over time, proportion of dispersal mode, turnover
-## PRODUCTS: figureS2.pdf, figureS3.pdf, figureS6.pdf
+## PRODUCTS: figureS1.pdf, figureS3.pdf, figureS4.pdf
 #########
 
 # loading libraries
@@ -230,7 +230,7 @@ change_table_all
 
 
 
-#### plotting Figure S2 ####
+#### plotting Figure S1 ####
 # changed total plot
 predict_changed <- ggpredict(m_change, terms = c("s.time [all]", "patch_type"))
 # adding time as non-scaled
@@ -296,46 +296,15 @@ present_plot <- predict_present %>%
 present_plot
 
 # all together
-figureS2 <- cowplot::plot_grid(changed_plot, present_plot, rel_widths = c(1, 1.44),
+figureS1 <- cowplot::plot_grid(changed_plot, present_plot, rel_widths = c(1, 1.44),
                                labels = c("(A)", "(B)"), label_size = 16)
-figureS2
+figureS1
 
 
 # exporting
-pdf(file = file.path("plots", "figureS2.pdf"), width = 14, height = 5.5)
-figureS2
-dev.off()
-
-
-# individual present plot
-present_plot <- predict_present %>%
-  ggplot(aes(x = time, y = predicted, color = group)) +
-  geom_point(aes(time, change, color = patch_type), data = stayed_present, size = 6, alpha = 0.15) +
-  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2, color = NA) +
-  geom_line(size = 3.5) +
-  xlab("Years since site creation") +
-  ylab(expression(atop("Number of species persisting", paste("between consecutive surveys")))) +
-  theme_minimal(base_size = 32) +
-  theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
-        panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
-        panel.grid.minor = element_blank(),
-        axis.ticks = element_line(color = "black", linewidth = 0.7),
-        strip.text.x = element_text(hjust = -0.05)) +
-  ylim(30, 150) +
-  scale_fill_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
-  scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), name = "Patch Type") +
-  theme(axis.text = element_text(size = 20), 
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
-        panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
-        plot.background = element_rect(fill = "transparent", color = NA)) +
-  theme(legend.position = "none")
-present_plot
-
-pdf(file = file.path("plots", "present_plot.pdf"), width = 12.3, height = 11.5)
-present_plot
-dev.off()
-
+# pdf(file = file.path("plots", "figureS1.pdf"), width = 14, height = 5.5)
+# figureS1
+# dev.off()
 
 
 

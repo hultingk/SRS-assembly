@@ -2,10 +2,10 @@
 ## SCRIPT NAME: 03_convergence.R
 ## AUTHOR: Katherine Hulting
 ## PURPOSE: Calculate convergence/divergence between patch type communities across time, repeat within dispersal mode groups
-## PRODUCTS: figure2.pdf, tableS1.html, tableS2.html, tableS3.html
+## PRODUCTS: figure4.pdf, tableS10.html, tableS11.html, tableS12.html
 #########
 
-librarian::shelf(tidyverse, vegan, ape, BiodiversityR, glmmTMB, AICcmodavg, 
+librarian::shelf(tidyverse, vegan, ape, glmmTMB, AICcmodavg, 
                  DHARMa, emmeans, car, ggeffects, performance, cowplot, here, kableExtra, scales)
 
 source(here::here(file.path("scripts", "02_pcoa.R")))
@@ -34,6 +34,7 @@ convergence_jaccard <- convergence_jaccard %>%
   filter(!patch_pair %in% c("Rectangular-Rectangular", "Winged-Winged")) %>%
   filter(time != 0) %>%
   mutate(dispersal_mode = "All Species")
+
 convergence_jaccard$s.time <- as.numeric(scale(convergence_jaccard$time)) # scaling time
 convergence_jaccard$patch_pair <- as.factor(convergence_jaccard$patch_pair)
 
@@ -53,44 +54,9 @@ converge.aic <- list(m.converge, m.converge_quad, m.converge_null)
 converge.aic.table <- aictab(converge.aic) # quadratic much better fit
 converge.aic.table
 
-## model checking
+## model summary
 summary(m.converge_quad)
-
-
-# percent change in dissimilarity from year 1-21 (20 years)
-# time 1 = -1.519113
-# time 21 = 1.436766
-# intercept + time_estimate (time) + time^2_estimate (time)
-# at time 1
-0.384906 + 0.013563*(-1.519113) + 0.005123*((-1.519113)^2) # 0.3761246
-# at time 21
-0.384906 + 0.013563*(1.436766) + 0.005123*((1.436766)^2) # 0.4149682
-
-# percent change = time 21 - time 1 / time 1 * 100
-(0.4149682 - 0.3761246)/0.3761246 * 100 #10.32732 % increase
-
-# 95% CI, percent change
 confint(m.converge_quad)
-# lower 95% CI
-# at time 1
-0.3607879039 + 0.0081246938*(-1.519113) + -0.0003483755*((-1.519113)^2) # 0.3476416
-# at time 21
-0.3607879039 + 0.0081246938*(1.436766) + -0.0003483755*((1.436766)^2) # 0.371742
-# percent change = time 21 - time 1 / time 1 * 100
-(0.371742 - 0.3476416)/0.3476416 * 100 #6.932542 % increase
-
-# upper 95% CI
-# at time 1
-0.4090249487 + 0.0190010704*(-1.519113) + 0.0105941226*((-1.519113)^2) # 0.4046083
-# at time 21
-0.4090249487 + 0.0190010704*(1.436766) + 0.0105941226*((1.436766)^2) # 0.4581945
-# percent change = time 21 - time 1 / time 1 * 100
-(0.4046083 - 0.4581945)/0.4581945 * 100 #11.69508 % increase
-
-
-# emmeans(m.converge_quad, ~s.time+I(s.time^2), at = list(s.time = c(-1.5320869, 1.4326678)),
-#         type = "response")
-# (0.382 - 0.398) / 0.398 * 100 # 8.28877 % increase over 20 years
 
 # Anova
 anova.converge <- Anova(m.converge_quad, type = "III")
@@ -104,20 +70,6 @@ m.converge_posthoc <- emmeans(m.converge_quad, ~ patch_pair*s.time+ patch_pair *
 m.converge_pairs <- pairs(m.converge_posthoc, simple = "patch_pair")
 m.converge_pairs
 
-# % increase in dissimilarity from (connected-winged) to (connected-rectangular)
-(0.385-0.359)/0.359 * 100 # connected patches are %7.24234 more similar to winged patches than rectangular patches across time
-#95% CI
-0.02548 +1.96 *0.00541 # upper = 0.0360836
-0.0360836/0.359 * 100 # upper = 10.05114%
-0.02548 -1.96 *0.00541 # lower = 0.0148764
-0.0148764/0.359 *100 # lower = 4.143844%
-
-# winged patches are closer in composition to connected patches than rectangular patches
-(0.359-0.375)/0.375 *100 # winged patches are 4.266667 % less similar to rectangular patches and closer to connected patches
--0.01590 +1.96 *0.00499 # upper = -0.0061196
--0.0061196/0.375 *100 #-1.631893
--0.01590 -1.96 *0.00499 # upper = -0.0256804
--0.0256804/0.375 *100 #-6.848107
 
 
 

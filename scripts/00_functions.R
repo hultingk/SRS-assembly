@@ -47,56 +47,6 @@ compute_convergence_jaccard <- function(df) {
 }
 
 
-#### partition changes in spatial beta diversity into changes due to colonization or extinction ####
-pairwise_ecopart <- function(nested_list, components) {
-  
-  # make sure times are sorted numerically
-  time_keys <- sort(as.numeric(names(nested_list)))
-  results <- map2(time_keys[-length(time_keys)], time_keys[-1], function(t1, t2) {
-    comp_names <- intersect(names(nested_list[[as.character(t1)]]),
-                            names(nested_list[[as.character(t2)]]))
-    
-    comp_res <- map(comp_names, function(cmp) {
-      mat1 <- nested_list[[as.character(t1)]][[cmp]]
-      mat2 <- nested_list[[as.character(t2)]][[cmp]]
-      
-      mat1 <- mat1 %>% dplyr::select(-block, -unique_id, -time, -unique_id_time) # drop metadata columns, keep only species
-      mat2 <- mat2 %>% dplyr::select(-block, -unique_id, -time, -unique_id_time) # drop metadata columns, keep only species
-      
-      common_species <- intersect(names(mat1), names(mat2))
-      mat1 <- mat1[, common_species, drop = FALSE] # make sure same species order
-      mat2 <- mat2[, common_species, drop = FALSE]# make sure same species order
-      
-      ecopart::ecopart.pair(mat1, mat2, components = components, index = "jaccard") # applying ecopart function
-    })
-    
-    names(comp_res) <- comp_names
-    comp_res
-  })
-  
-  names(results) <- paste(time_keys[-length(time_keys)], time_keys[-1], sep = "_vs_") # returning results with correct time comparisons
-  results
-}
-
-
-#### convert pairwise_ecopart results into dataframe ####
-results_to_df <- function(results) { # taking a nested list and flattening it - two metrics nested within patch comparison nested within year comparison
-  map_dfr(names(results), function(year_pair) { # looping over each year pair
-    comps <- results[[year_pair]]
-    
-    map_dfr(names(comps), function(comp) { # looping over each patch pair
-      vals <- comps[[comp]] # getting metrics
-      
-      tibble(
-        year_pair = year_pair,
-        comparison = comp,
-        metric = names(vals),
-        value = as.numeric(vals)
-      )
-    })
-  })
-}
-
 
 #### calculate raw composition change between consecutive years ####
 compute_composition_change <- function(df) {

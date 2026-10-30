@@ -1,8 +1,8 @@
 ########
-## SCRIPT NAME: 04a_cta_segments.R
+## SCRIPT NAME: 04_cta_segments.R
 ## AUTHOR: Katherine Hulting
 ## PURPOSE: Calculate interannual trajectory distances, repeat within dispersal mode groups
-## PRODUCTS: tableS4.html, tableS5.html, tableS6.html, figure3.pdf
+## PRODUCTS: tableS1.html, tableS2.html, tableS3.html, figure2.pdf
 #########
 
 ### community trajectory analysis - segment lengths
@@ -86,6 +86,7 @@ length.aic.table
 
 # model fit
 summary(m_length_quad)
+confint(m_length_quad)
 plot(simulateResiduals(m_length_quad))
 # performance::check_model(m_length_quad)
 performance::r2(m_length_quad)
@@ -97,35 +98,6 @@ m_length_posthoc <- emmeans(m_length_quad, ~ patch_type*s.time + patch_type * I(
 m_length_pairs <- pairs(m_length_posthoc, simple = "patch_type")
 m_length_pairs
 
-# percent change in segment length from year 2-22 (20 years)
-# time 2 = -1.5077466
-# time 22 = 1.5664900
-# intercept + time_estimate (time) + time^2_estimate (time)
-# at time 2
-0.241442 + -0.017123*(-1.5077466) + 0.014279*((-1.5077466)^2) # 0.2997196
-# at time 22
-0.241442 + -0.017123*(1.5664900) + 0.014279*((1.5664900)^2) # 0.2496581
-
-# percent change = time 22 - time 2 / time 2 * 100
-(0.2496581 - 0.2997196)/0.2997196 * 100 #-16.70278 % decrease
-
-# 95% CI, percent change
-confint(m_length_quad)
-# lower 95% CI
-# at time 1
-0.214760382 + -0.025648096*(-1.5077466) + 0.006113128*((-1.5077466)^2) # 0.2673282
-# at time 21
-0.214760382 + -0.025648096*(1.5664900) + 0.006113128*((1.5664900)^2) # 0.1895838
-# percent change = time 21 - time 1 / time 1 * 100
-(0.1895838 - 0.2673282)/0.2673282 * 100 #-29.082 % 
-
-# upper 95% CI
-# at time 1
-0.268123543 + -0.008598510*(-1.5077466) + 0.022445636*((-1.5077466)^2) # 0.3321136
-# at time 21
-0.268123543 + -0.008598510*(1.5664900) + 0.022445636*((1.5664900)^2) # 0.3097332
-# percent change = time 21 - time 1 / time 1 * 100
-(0.3097332 - 0.3321136)/0.3321136 * 100 #-6.738779 % 
 
 
 

@@ -1,8 +1,8 @@
 ########
-## SCRIPT NAME: 04b_cta_directionality.R
+## SCRIPT NAME: 05_cta_directionality.R
 ## AUTHOR: Katherine Hulting
 ## PURPOSE: Calculate trajectory directionality, repeat within dispersal mode groups
-## PRODUCTS: tableS7.html, tableS8.html, table S9.html, figure4.pdf
+## PRODUCTS: tableS7.html, tableS8.html, table S9.html, figure3.pdf
 #########
 
 ### loading libraries
@@ -15,7 +15,7 @@ source(here::here(file.path("scripts", "04_cta_segments.R")))
 #### ALL SPECIES ####
 ########################
 ## directionality broken into time periods 
-###### directionality in first 12 years ###
+###### directionality in first part ###
 sp_info_first <- srs_data_wider %>%
   filter(time <= 15)
 
@@ -46,7 +46,7 @@ segment_direction_first <- segment_direction_first %>%
   rename(directionality = segment_direction_first)
 
 
-###### directionality in second 12 years ###
+###### directionality in second part ###
 sp_info_second <- srs_data_wider %>%
   filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
@@ -102,11 +102,7 @@ m.direction_pairs <- pairs(m.direction.posthoc, simple = "patch_type")
 m.direction_pairs
 m.direction_pairs2 <- pairs(m.direction.posthoc, simple = "time")
 m.direction_pairs2
-# percent change from decade 1 to decade 2
-(-0.035256)/0.368895 * 100 # -9.557191% decrease in directionality
-confint(m.direction)
-(-0.047920779)/(0.359860618) *100 # -13.31648%
-(-0.022590546)/(0.377929254) *100 # -5.977454%
+
 
 
 
@@ -117,7 +113,7 @@ confint(m.direction)
 ###### ANIMAL #####
 ###############################
 animal_data$time <- as.numeric(animal_data$time)
-# first 12 years
+# first part
 animal_first <- animal_data %>%
   filter(time <= 15)
 
@@ -148,7 +144,7 @@ animal_direction_first <- animal_direction_first %>%
   rename(directionality = animal_direction_first)
 
 
-# second half of succession
+# second part of succession
 animal_second <- animal_data %>%
   filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
@@ -210,7 +206,7 @@ m.animal_direction_pairs2
 ###################################
 
 gravity_data$time <- as.numeric(gravity_data$time)
-# first 12 years
+# first part
 gravity_first <- gravity_data %>%
   filter(time <= 15)
 
@@ -241,7 +237,7 @@ gravity_direction_first <- gravity_direction_first %>%
   rename(directionality = gravity_direction_first)
 
 
-# second half of succession
+# second part of succession
 gravity_second <- gravity_data %>%
   filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
@@ -302,7 +298,7 @@ m.gravity_direction_pairs2
 #################################
 
 wind_data$time <- as.numeric(wind_data$time)
-# first 12 years
+# first part
 wind_first <- wind_data %>%
   filter(time <= 15)
 
@@ -333,7 +329,7 @@ wind_direction_first <- wind_direction_first %>%
   rename(directionality = wind_direction_first)
 
 
-# second half of succession
+# second part of succession
 wind_second <- wind_data %>%
   filter(time >= 16) %>%
   separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%

@@ -97,7 +97,7 @@ all_segment_plot_subset <- m_length_predict_subset %>%
   geom_point(aes(time, distance, color = patch_type), size = 6, alpha = 0.15, data = segment_lengths_subset) +
   geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 32) +
+  theme_minimal(base_size = 34) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -110,9 +110,9 @@ all_segment_plot_subset <- m_length_predict_subset %>%
   #guides(fill=guide_legend(ncol=1)) +
   #guides(color=guide_legend(ncol=1)) +
   #scale_y_continuous(limits = c(0.19, 0.38), labels = label_number(accuracy = 0.01)) +
-  theme(axis.text = element_text(size = 20), 
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
+  theme(axis.text = element_text(size = 26), 
+        legend.text = element_text(size = 30),
+        legend.title = element_text(size = 30),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(legend.position = "right")
@@ -122,73 +122,70 @@ all_segment_plot_subset
 
 #### Directionality ####
 ## directionality broken into time periods 
-###### directionality in first 12 years ###
-sp_info_1_12_subset <- srs_data_subset_wider %>%
-  filter(time <= 12)
+###### directionality in first part ###
+sp_info_1_15_subset <- srs_data_subset_wider %>%
+  filter(time <= 15)
 
-patch_info_1_12_subset <- sp_info_1_12_subset %>%
+patch_info_1_15_subset <- sp_info_1_15_subset %>%
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-sp_info_1_12_subset <- sp_info_1_12_subset %>%
+sp_info_1_15_subset <- sp_info_1_15_subset %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
   dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-jaccard_dist_1_12_subset <- vegdist(sp_info_1_12_subset, method = "jaccard")
+jaccard_dist_1_15_subset <- vegdist(sp_info_1_15_subset, method = "jaccard")
 
 # defining trajectories
-srs_trajectory_1_12_subset <- defineTrajectories(jaccard_dist_1_12_subset, sites = patch_info_1_12_subset$unique_id, surveys = patch_info_1_12_subset$time)
+srs_trajectory_1_15_subset <- defineTrajectories(jaccard_dist_1_15_subset, sites = patch_info_1_15_subset$unique_id, surveys = patch_info_1_15_subset$time)
 
 # directionality
-segment_direction_1_12_subset <- trajectoryDirectionality(srs_trajectory_1_12_subset)
-segment_direction_1_12_subset <- data.frame(segment_direction_1_12_subset)
-segment_direction_1_12_subset <- segment_direction_1_12_subset %>%
+segment_direction_1_15_subset <- trajectoryDirectionality(srs_trajectory_1_15_subset)
+segment_direction_1_15_subset <- data.frame(segment_direction_1_15_subset)
+segment_direction_1_15_subset <- segment_direction_1_15_subset %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 1-12") %>%
-  rename(directionality = segment_direction_1_12_subset)
+  mutate(time = "Year 1-15") %>%
+  rename(directionality = segment_direction_1_15_subset)
 
-###### directionality in second 12 years ###
-sp_info_13_24_subset <- srs_data_subset_wider %>%
-  filter(time >= 13) %>%
-  separate(unique_id, into = c("block", "patch", "patch_type"), sep = "-") %>%
-  filter(block != "54N") %>% # 54N only has 2 years of surveys after year 12 -- not enough to calculate directionality
-  mutate(unique_id = paste(block, patch, patch_type, sep = "-")) 
+###### directionality in second part ###
+sp_info_16_24_subset <- srs_data_subset_wider %>%
+  filter(time >= 16) 
 
-patch_info_13_24_subset <- sp_info_13_24_subset %>% 
+patch_info_16_24_subset <- sp_info_16_24_subset %>% 
   arrange(unique_id, time) %>%
   dplyr::select(unique_id, time, year)
 
 # species matrix
-sp_info_13_24_subset <- sp_info_13_24_subset %>%
+sp_info_16_24_subset <- sp_info_16_24_subset %>%
   arrange(unique_id, time) %>%
   mutate(unique_id_year = paste(unique_id, time, year, sep = "-")) %>%
   column_to_rownames("unique_id_year") %>%
-  dplyr::select(!c("unique_id", "time", "year", "block", "patch", "patch_type"))
+  dplyr::select(!c("unique_id", "time", "year"))
 
 # Jaccard distance matrix
-jaccard_dist_13_24_subset <- vegdist(sp_info_13_24_subset, method = "jaccard")
+jaccard_dist_16_24_subset <- vegdist(sp_info_16_24_subset, method = "jaccard")
 
 # defining trajectories
-srs_trajectory_13_24_subset <- defineTrajectories(jaccard_dist_13_24_subset, sites = patch_info_13_24_subset$unique_id, surveys = patch_info_13_24_subset$time)
+srs_trajectory_16_24_subset <- defineTrajectories(jaccard_dist_16_24_subset, sites = patch_info_16_24_subset$unique_id, surveys = patch_info_16_24_subset$time)
 
 # directionality
-segment_direction_13_24_subset <- trajectoryDirectionality(srs_trajectory_13_24_subset)
-segment_direction_13_24_subset <- data.frame(segment_direction_13_24_subset)
-segment_direction_13_24_subset <- segment_direction_13_24_subset %>%
+segment_direction_16_24_subset <- trajectoryDirectionality(srs_trajectory_16_24_subset)
+segment_direction_16_24_subset <- data.frame(segment_direction_16_24_subset)
+segment_direction_16_24_subset <- segment_direction_16_24_subset %>%
   rownames_to_column("unique_id") %>%
   separate(unique_id, into = c("block", "patch", "patch_type")) %>%
-  mutate(time = "Year 13-24") %>%
-  rename(directionality = segment_direction_13_24_subset)
+  mutate(time = "Year 16-24") %>%
+  rename(directionality = segment_direction_16_24_subset)
 
 #### putting all together
 segment_direction_all_subset <- rbind(
-  segment_direction_1_12_subset,
-  segment_direction_13_24_subset
+  segment_direction_1_15_subset,
+  segment_direction_16_24_subset
 )
 segment_direction_all_subset$dispersal_mode <- "All Species"
 
@@ -219,7 +216,7 @@ direction_plot_subset <- m.direction.predict_subset %>%
   geom_errorbar(aes(x = x, y = predicted, ymin = conf.low, ymax = conf.high, fill = group), color = "black",
                 data = m.direction.predict_subset, width = 0, linewidth = 3,  position = position_dodge(width = 0.7)) +
   #scale_y_continuous(limits = c(0.32, 0.38), labels = label_number(accuracy = 0.01)) +
-  theme_minimal(base_size = 26) +
+  theme_minimal(base_size = 32) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -239,7 +236,9 @@ direction_plot_subset <- m.direction.predict_subset %>%
   scale_color_manual(values = c("#5389A4", "#CC6677", "#DCB254"), 
                      labels = c("Connected", "Rectangular", "Winged"), 
                      name = "Patch Type") +
-  theme(axis.text = element_text(size = 18)) +
+  theme(axis.text = element_text(size = 26), 
+        legend.text = element_text(size = 28),
+        legend.title = element_text(size = 28)) +
   theme(legend.position = "right") 
 direction_plot_subset
 
@@ -295,7 +294,7 @@ convergence_plot_subset <- m.converge.predict_subset %>%
   geom_point(aes(time, jaccard, color = patch_pair), size = 6, alpha = 0.07, data = convergence_jaccard_subset) +
   geom_ribbon(aes(x = time, ymin = conf.low, ymax = conf.high, fill = group), alpha = 0.2) +
   geom_line(aes(time, predicted, color = group), linewidth = 3.5) +
-  theme_minimal(base_size = 32) +
+  theme_minimal(base_size = 34) +
   theme(panel.border = element_rect(colour = "black", fill=NA, linewidth=1),
         panel.grid.major = element_line(linetype = 2, linewidth = 0.7, color = "grey85"), 
         panel.grid.minor = element_blank(),
@@ -313,9 +312,9 @@ convergence_plot_subset <- m.converge.predict_subset %>%
   ylab(expression(paste("Spatial ", beta, " diversity (Jaccard)"))) +
   guides(fill=guide_legend(ncol=1)) +
   guides(color=guide_legend(ncol=1)) +
-  theme(axis.text = element_text(size = 20),
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 26),
+  theme(axis.text = element_text(size = 26),
+        legend.text = element_text(size = 30),
+        legend.title = element_text(size = 30),
         panel.background = element_rect(fill = "transparent", color = NA), # Inside axes
         plot.background = element_rect(fill = "transparent", color = NA)) +
   theme(legend.position = "right") 
@@ -324,16 +323,16 @@ convergence_plot_subset
 
 
 #### plots exporting ####
-pdf(file = file.path("plots", "calendar_subset_length.pdf"), width = 14, height = 8)
-all_segment_plot_subset
-dev.off()
-
-pdf(file = file.path("plots", "calendar_subset_direction.pdf"), width = 12, height = 7)
-direction_plot_subset
-dev.off()
-
-pdf(file = file.path("plots", "calendar_subset_convergence.pdf"), width = 15.5, height = 8)
-convergence_plot_subset
-dev.off()
-
+# pdf(file = file.path("plots", "calendar_subset_length.pdf"), width = 14, height = 8)
+# all_segment_plot_subset
+# dev.off()
+# 
+# pdf(file = file.path("plots", "calendar_subset_direction.pdf"), width = 13, height = 8)
+# direction_plot_subset
+# dev.off()
+# 
+# pdf(file = file.path("plots", "calendar_subset_convergence.pdf"), width = 16, height = 8)
+# convergence_plot_subset
+# dev.off()
+# 
 
