@@ -41,7 +41,7 @@ Script for supplemental repeating analyses with only blocks that were active for
 * Requires: 00_functions.R, 01_wrangling.R
 * Products: figureS6.pdf
 
-* #### 06c-supplement-year.R
+#### 06c-supplement-year.R
 Script for supplemental repeating analyses using calender year as predictor
 * Requires: 00_functions.R, 01_wrangling.R
 * Products: figureS5.pdf
