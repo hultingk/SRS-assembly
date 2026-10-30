@@ -14,32 +14,38 @@ Script for data cleaning and wrangling.
 #### 02_pcoa.R
 Script for visualizing PCoA of plant community trajectories 
 * Requires: 01_wrangling.R 
-* Products: figureS1.pdf 
+* Products: figureS2.pdf 
 
 #### 03_convergence.R
 Script for calculating convergence/divergence between patch type communities across time, repeat within dispersal mode groups
 * Requires: 00_functions.R, 02_pcoa.R
-* Products: figure2.pdf, tableS1.html, tableS2.html, tableS3.html
-
-#### 03b_colonization_extinction.R
-Script for partitioning changes in spatial beta diversity over time into changes due to colonization and extinction
-* Requires: 00_functions.R, 01_wrangling.R
-* Products: figureS5.pdf
+* Products: figure4.pdf, tableS10.html, tableS11.html, tableS12.html
 
 #### 04_cta_segments.R
 Script for calculating interannual trajectory distances, repeat within dispersal mode groups
 * Requires: 00_functions.R, 01_wrangling.R
-* Products: figure3.pdf, tableS4.html, tableS5.html, table S6.html
+* Products: tableS1.html, tableS2.html, tableS3.html, figure2.pdf
 
 #### 05_cta_directionality.R
 Script for calculating trajectory directionality, repeat within dispersal mode groups
 * Requires: 04_cta_segments.R
-* Products: tableS7.html, tableS8.html, tableS9.html, figure4.pdf
+* Products: tableS7.html, tableS8.html, table S9.html, figure3.pdf
 
 #### 06_supplement.R
 Script for supplemental exploratory plots: species richness over time, proportion of dispersal mode, turnover
 * Requires: 00_functions.R, 01_wrangling.R
-* Products: figureS2.pdf, figureS3.pdf, figureS6.pdf
+* Products: figureS1.pdf, figureS3.pdf, figureS4.pdf
+
+#### 06b-supplement-subset.R
+Script for supplemental repeating analyses with only blocks that were active for the full time series
+* Requires: 00_functions.R, 01_wrangling.R
+* Products: figureS6.pdf
+
+* #### 06c-supplement-year.R
+Script for supplemental repeating analyses using calender year as predictor
+* Requires: 00_functions.R, 01_wrangling.R
+* Products: figureS5.pdf
+
 
 
 
